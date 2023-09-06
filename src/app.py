@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Planet, People
 #from models import Person
 
 app = Flask(__name__)
@@ -36,14 +36,67 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+# User ------------------------------------------------------------------------------
+#Get ><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def get_user():
+    user = User.query.all()
+    user_serialized = list(map(lambda x : x.serialized(), user))
+    return jsonify({"msg": 'The user has been successfuly created!', "user": user_serialized})
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
 
-    return jsonify(response_body), 200
+# People ------------------------------------------------------------------------------
+#Get ><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+@app.route('/people', methods=['GET'])
+def get_planet():
+    people = People.query.all()
+    people_serialized = list(map(lambda x : x.serialized(), people))
+    return jsonify({"msg": 'Completed', "people": people_serialized})
+
+# Planets ----------------------------------------------------------------------------
+#Get ><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+@app.route('/planet', methods=['GET'])
+def get_planet():
+    planet = Planet.query.all()
+    planet_serialized = list(map(lambda x : x.serialized(), planet))
+    return jsonify({"msg": 'Completed', "planet": planet_serialized})
+
+
+
+
+#Put ><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+@app.route('/planet', methods=['PUT'])
+def modify_planet():
+    body = request.get_json(silent = True)
+    if body is None:
+        raise APIException("Debes de enviar información al body", status_code=400)
+    if "id" not in body:
+        raise APIException("Debes enviar el id del planeta a modificar", status_code=400)
+    if "name" not in body:
+        raise APIException("Debes enviar el nombre del planeta", status_code=400)
+    return jsonify({"msg": 'Completed'})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
