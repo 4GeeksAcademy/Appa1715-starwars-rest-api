@@ -37,7 +37,6 @@ def sitemap():
     return generate_sitemap(app)
 
 # User ------------------------------------------------------------------------------
-#Get ><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 @app.route('/user', methods=['GET'])
 def get_user():
@@ -47,16 +46,24 @@ def get_user():
 
 
 # People ------------------------------------------------------------------------------
-#Get ><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
 
 @app.route('/people', methods=['GET'])
-def get_planet():
+def get_people():
     people = People.query.all()
     people_serialized = list(map(lambda x : x.serialized(), people))
     return jsonify({"msg": 'Completed', "people": people_serialized})
 
+@app.route('/people/<int:people_id>', methods=['GET'])
+def get_planet_by_id(people_id):
+    single_person = People.query.get(people_id)
+    if single_person is None:
+        raise APIException("La persona no existe")
+    people_serialized = single_person.serialize()
+    return jsonify({"msg": 'Logrado!', "people": people_serialized['people']})
+
 # Planets ----------------------------------------------------------------------------
-#Get ><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
 
 @app.route('/planet', methods=['GET'])
 def get_planet():
@@ -64,21 +71,25 @@ def get_planet():
     planet_serialized = list(map(lambda x : x.serialized(), planet))
     return jsonify({"msg": 'Completed', "planet": planet_serialized})
 
+@app.route('/planet/<int:planet_id>', methods=['GET'])
+def get_planet_by_id(planet_id):
+    single_planet = Planet.query.get(planet_id)
+    if single_planet is None:
+        raise APIException("Este planeta no es existente")
+    planet_serialized = single_planet.serialize()
+    return jsonify({"msg": 'Logrado!', "planet": planet_serialized['planet']})
 
 
-
-#Put ><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-
-@app.route('/planet', methods=['PUT'])
-def modify_planet():
-    body = request.get_json(silent = True)
-    if body is None:
-        raise APIException("Debes de enviar información al body", status_code=400)
-    if "id" not in body:
-        raise APIException("Debes enviar el id del planeta a modificar", status_code=400)
-    if "name" not in body:
-        raise APIException("Debes enviar el nombre del planeta", status_code=400)
-    return jsonify({"msg": 'Completed'})
+# @app.route('/planet', methods=['PUT'])
+# def modify_planet():
+#     body = request.get_json(silent = True)
+#     if body is None:
+#         raise APIException("Debes de enviar información al body", status_code=400)
+#     if "id" not in body:
+#         raise APIException("Debes enviar el id del planeta a modificar", status_code=400)
+#     if "name" not in body:
+#         raise APIException("Debes enviar el nombre del planeta", status_code=400)
+#     return jsonify({"msg": 'Completed'})
 
 
 
