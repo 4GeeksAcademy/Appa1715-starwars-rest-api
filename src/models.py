@@ -7,8 +7,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-    favorite_id = db.Column(db.Integer, db.ForeignKey("favorite_id"))
-    favorite = db.relationship("Favorite")
+    favorite = db.relationship("Favorite", backref= "user", uselist=True)
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -17,7 +16,6 @@ class User(db.Model):
         return {
             "id": self.id,
             "email": self.email,
-            "is_active": self.is_active,
         }
     
 
@@ -28,8 +26,6 @@ class Planet(db.Model):
     gravity = db.Column(db.String(120))
     terrain = db.Column(db.String(120))
     population = db.Column(db.String(120))
-    people_id = db.Column(db.Integer, db.ForeignKey("people.id"))
-    people = db.relationship("People")
 
 
     def serialize(self):
@@ -48,8 +44,9 @@ class People(db.Model):
     hair_color = db.Column(db.String(120))
     skin_color = db.Column(db.String(120))
     eye_color = db.Column(db.String(120))
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    user = db.relationship("User")
+    planet_id = db.Column(db.Integer, db.ForeignKey("planet.id"))
+    planet = db.relationship("Planet")
+
 
     def serialize(self):
         return {
@@ -60,15 +57,17 @@ class People(db.Model):
             "eye_color": self.eye_color,
         }
 
-    
+
 class Favorite(db.Model):
     __tablename__= 'favorite'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    planet_id = db.Column(db.Integer, db.ForeignKey("planet.id"))
-    planet = db.relationship("Planet")
-    people_id = db.Column(db.Integer, db.ForeignKey("people.id"))
-    people = db.relationship("People")
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    __table_args__= (db.UniqueConstraint(
+        'user_id',
+        'name',
+        name ='favorite_unique'
+    ),)
 
 
 
@@ -76,7 +75,5 @@ class Favorite(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "planet_id": self.planet_id,
-            "people_id": self.people_id,
-            
+            "user_id": self.user_id,            
         }
